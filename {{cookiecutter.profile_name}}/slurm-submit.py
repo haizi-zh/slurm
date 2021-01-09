@@ -8,6 +8,10 @@ from snakemake.utils import read_job_properties
 
 import slurm_utils
 
+import logging
+
+logger = logging.getLogger("__name__")
+
 # cookiecutter arguments
 SBATCH_DEFAULTS = """{{cookiecutter.sbatch_defaults}}{% if cookiecutter.cluster_name %} cluster={{cookiecutter.cluster_name}}{% endif %}"""
 CLUSTER_CONFIG = "{{cookiecutter.cluster_config}}"
@@ -17,6 +21,7 @@ ADVANCED_ARGUMENT_CONVERSION = {"yes": True, "no": False}[
 
 RESOURCE_MAPPING = {
     "time": ("time", "runtime", "walltime"),
+    "time-min": ("time_min",),
     "mem": ("mem", "mem_mb", "ram", "memory"),
     "mem-per-cpu": ("mem-per-cpu", "mem_per_cpu", "mem_per_thread"),
     "nodes": ("nodes", "nnodes"),
@@ -42,6 +47,11 @@ sbatch_options.update(
 
 # 4) cluster_config for particular rule
 sbatch_options.update(cluster_config.get(job_properties.get("rule"), {}))
+
+# 4a) Job name
+job_label = job_properties.get("params", {}).get("label")
+if job_label:
+    sbatch_options.update({"job-name": job_label})
 
 # 5) cluster_config options
 sbatch_options.update(job_properties.get("cluster", {}))

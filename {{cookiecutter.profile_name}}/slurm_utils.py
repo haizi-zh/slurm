@@ -163,6 +163,8 @@ def submit_job(jobscript, **sbatch_options):
     options = format_sbatch_options(**sbatch_options)
     try:
         cmd = ["sbatch"] + ["--parsable"] + options + [jobscript]
+        # Log the complete SBATCH command used to submit the job
+        logger.warning(f"SBATCH command: {' '.join(cmd)}")
         res = sp.check_output(cmd)
     except sp.CalledProcessError as e:
         raise e
